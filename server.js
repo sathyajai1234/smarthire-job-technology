@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 
-const client = new OpenAI({
+const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -8,7 +8,11 @@ app.post("/analyze", async (req, res) => {
   try {
     const { resume } = req.body;
 
-    const response = await client.chat.completions.create({
+    if (!resume) {
+      return res.status(400).json({ error: "Resume is required" });
+    }
+
+    const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -23,7 +27,7 @@ app.post("/analyze", async (req, res) => {
     });
 
   } catch (error) {
-    console.error(error);
+    console.error("AI ERROR:", error);
     res.status(500).json({ error: "AI failed" });
   }
 });
