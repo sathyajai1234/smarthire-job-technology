@@ -12,22 +12,17 @@ app.post("/analyze", async (req, res) => {
       return res.status(400).json({ error: "Resume is required" });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await openai.responses.create({
       model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `Analyze this resume and give strengths, weaknesses, and suggestions:\n\n${resume}`,
-        },
-      ],
+      input: `Analyze this resume and give strengths, weaknesses, and suggestions:\n\n${resume}`,
     });
 
     res.json({
-      result: response.choices[0].message.content,
+      result: response.output[0].content[0].text,
     });
 
   } catch (error) {
-    console.error("AI ERROR:", error);
+    console.error("AI ERROR:", error.message);
     res.status(500).json({ error: "AI failed" });
   }
 });
