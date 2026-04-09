@@ -1,36 +1,35 @@
-app.post("/analyze", async (req, res) => {
-  try {
-    const { resume } = req.body;
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-    if (!resume) {
-      return res.status(400).json({ error: "Resume is required" });
-    }
+dotenv.config();
 
-    // ✅ Lazy import (prevents startup crash)
-    const { default: OpenAI } = await import("openai");
+const app = express();
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
+app.use(cors());
+app.use(express.json());
 
-    const response = await openai.responses.create({
-      model: "gpt-4o-mini",
-      input: `Give short analysis:
-- Strengths
-- Weaknesses
-- Suggestions
+// TEST ROUTE
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
 
-Resume:
-${resume}`,
-      max_output_tokens: 200,
-    });
+// SIMPLE ANALYZE (NO AI → NO CRASH)
+app.post("/analyze", (req, res) => {
+  const { resume } = req.body;
 
-    res.json({
-      result: response.output_text,
-    });
-
-  } catch (error) {
-    console.error("AI ERROR:", error);
-    res.status(500).json({ error: "AI failed" });
+  if (!resume) {
+    return res.status(400).json({ error: "Resume is required" });
   }
+
+  res.json({
+    result: "Resume received ✅ (AI temporarily disabled)",
+  });
+});
+
+// IMPORTANT FOR RENDER
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
