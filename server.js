@@ -1,46 +1,47 @@
-app.post("/analyze", async (req, res) => {
-  try {
-    const { resume } = req.body;
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-    if (!resume) {
-      return res.status(400).json({ error: "Resume is required" });
-    }
+dotenv.config();
 
-    // ✅ SAFE IMPORT
-    const { default: OpenAI } = await import("openai");
+const app = express();
 
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY || "dummy", // prevents crash
-    });
+app.use(cors());
+app.use(express.json());
 
-    let resultText = "AI not configured";
+// Test route
+app.get("/", (req, res) => {
+  res.send("Backend is running ✅");
+});
 
-    // ✅ Only call AI if key exists
-    if (process.env.OPENAI_API_KEY) {
-      const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "user",
-            content: `Analyze this resume:
-Give strengths, weaknesses, suggestions.
+// Analyze route (NO AI → SAFE)
+app.post("/analyze", (req, res) => {
+  const { resume } = req.body;
 
-${resume}`,
-          },
-        ],
-      });
-
-      resultText = response.choices?.[0]?.message?.content || "No result";
-    }
-
-    res.json({ result: resultText });
-
-  } catch (error) {
-    console.error("SAFE AI ERROR:", error.message);
-
-    // ✅ NEVER CRASH SERVER
-    res.json({
-      result: "AI temporarily unavailable, but backend is working ✅",
-    });
+  if (!resume) {
+    return res.status(400).json({ error: "Resume is required" });
   }
+
+  // Fake AI response
+  res.json({
+    result: `
+Strengths:
+- Good technical skills
+- Clear project experience
+
+Weaknesses:
+- Limited real-world exposure
+
+Suggestions:
+- Add more projects
+- Improve advanced skills
+    `,
+  });
+});
+
+// Render port
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
 });
