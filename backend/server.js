@@ -3,10 +3,13 @@ import cors from "cors";
 
 const app = express();
 
-// ✅ IMPORTANT for Render
-const PORT = process.env.PORT || 5000;
+// ✅ Middleware
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST"],
+  allowedHeaders: ["Content-Type"]
+}));
 
-app.use(cors());
 app.use(express.json());
 
 // ✅ Test route
@@ -14,40 +17,38 @@ app.get("/", (req, res) => {
   res.send("Backend is running 🚀");
 });
 
-// ✅ Analyze route
+// 🔥 DEBUG ANALYZE ROUTE
 app.post("/analyze", (req, res) => {
   try {
-    const { resume } = req.body;
+    console.log("📥 Incoming request body:");
+    console.log(req.body);
 
-    if (!resume) {
-      return res.status(400).json({ result: "No resume provided" });
+    const { resumeText } = req.body;
+
+    if (!resumeText) {
+      return res.status(400).json({
+        message: "No resume text received ❌",
+      });
     }
 
-    // Simple analysis (NO AI → stable)
-    const result = `
-Resume Analysis:
-
-✔ Good points:
-- Has structured content
-- Includes skills and experience
-
-⚠ Improvements:
-- Add more technical details
-- Add projects with impact
-- Improve formatting
-
-⭐ Overall Score: 7/10
-`;
-
-    res.json({ result });
+    // ✅ Temporary response (to test connection)
+    res.json({
+      message: "API WORKING ✅",
+      received: resumeText.substring(0, 100) // show part of resume
+    });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ result: "Server error" });
+    console.error("❌ ERROR:", error);
+
+    res.status(500).json({
+      message: "Server error ❌",
+    });
   }
 });
 
-// ✅ VERY IMPORTANT
+// ✅ PORT (IMPORTANT for Railway)
+const PORT = process.env.PORT || 5000;
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 Server running on port ${PORT}`);
 });
